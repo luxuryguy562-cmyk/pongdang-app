@@ -283,7 +283,7 @@
   const pmt = `영수증 분석 JSON: date, vendor, item, totalPrice, category`;
 
   try {
-    const res = await fetch("https://너의-worker-url.workers.dev", {
+    const res = await fetch("https://gemini-proxy.luxuryguy562.workers.dev", {
       method: "POST",
       headers: {
         "Content-Type": "application/json"
@@ -314,14 +314,15 @@
 
     let html = "";
     list.forEach((i, idx) => {
-      html += `<tr id="row-${idx}">
-        <td><button class="x-btn" onclick="openReasonSheet(${idx})">X</button></td>
-        <td><input type="text" value="${i.vendor}"></td>
-        <td><input type="text" value="${i.item}"></td>
-        <td><input type="number" value="${i.totalPrice}"></td>
-        <td><input type="text" value="${i.category}"></td>
-      </tr>`;
-    });
+  html += `<tr id="row-${idx}">
+    <td><button class="x-btn" onclick="openReasonSheet(${idx})">X</button></td>
+    <td><input type="text" class="c-v" value="${i.vendor}"></td>
+    <td><input type="text" class="c-i" value="${i.item}"></td>
+    <td><input type="number" class="c-p" value="${i.totalPrice}"></td>
+    <td><input type="text" class="c-c" value="${i.category}"></td>
+    <input type="hidden" class="c-d" value="${i.date || new Date().toISOString().split('T')[0]}"> 
+  </tr>`;
+});
 
     document.getElementById('resTable').innerHTML = html;
     document.getElementById('resultArea').style.display = 'block';
