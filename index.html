@@ -478,5 +478,49 @@
   }
 
 </script>
+<div id="pwa-install-banner" style="display:none; position:fixed; bottom:20px; left:20px; right:20px; background:#fff; padding:15px; border-radius:12px; box-shadow:0 4px 20px rgba(0,0,0,0.2); z-index:9999; border:1px solid #eee;">
+    <div style="display:flex; align-items:center; gap:12px;">
+        <img src="icon-192.png" width="40" height="40" style="border-radius:8px;">
+        <div style="flex:1;">
+            <strong style="font-size:14px; display:block;">퐁당 앱 설치하기</strong>
+            <span style="font-size:12px; color:#666;" id="install-text">홈 화면에 추가하여 앱처럼 사용하세요!</span>
+        </div>
+        <button id="btn-install" style="background:#007bff; color:#fff; border:none; padding:8px 15px; border-radius:6px; font-weight:bold; font-size:13px;">설치</button>
+    </div>
+</div>
+
+<script>
+let deferredPrompt;
+const banner = document.getElementById('pwa-install-banner');
+const installBtn = document.getElementById('btn-install');
+const installText = document.getElementById('install-text');
+
+// 1. 안드로이드 전용: 설치 팝업 가로채기
+window.addEventListener('beforeinstallprompt', (e) => {
+    e.preventDefault();
+    deferredPrompt = e;
+    banner.style.display = 'block'; // 안드로이드라면 배너 보이기
+});
+
+installBtn.addEventListener('click', async () => {
+    if (deferredPrompt) {
+        deferredPrompt.prompt();
+        const { outcome } = await deferredPrompt.userChoice;
+        if (outcome === 'accepted') banner.style.display = 'none';
+        deferredPrompt = null;
+    } else {
+        // 2. 아이폰(iOS)인 경우 가이드 메시지 변경
+        alert("아이폰은 [공유 버튼] -> [홈 화면에 추가]를 눌러 수동으로 설치해야 합니다.");
+    }
+});
+
+// 아이폰(iOS) 접속 감지 로직
+const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
+if (isIOS && !window.navigator.standalone) {
+    banner.style.display = 'block';
+    installText.innerText = "아래 [공유] 버튼 클릭 후 '홈 화면에 추가'를 눌러주세요!";
+    installBtn.innerText = "방법 보기";
+}
+</script>
 </body>
 </html>
