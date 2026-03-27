@@ -114,7 +114,7 @@
         if(w > 800) { h *= 800/w; w = 800; }
         cvs.width = w; cvs.height = h;
         cvs.getContext('2d').drawImage(img, 0, 0, w, h);
-        b64 = cvs.toDataURL('image/jpeg', 0.7).split(',')[1];
+        b64 = cvs.toDataURL('image/jpeg', 0.4).split(',')[1];
         document.getElementById('imgPreview').src = cvs.toDataURL('image/jpeg');
         document.getElementById('imgPreview').style.display = 'block';
         document.getElementById('uploadGroup').style.display = 'none';
