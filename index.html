@@ -228,8 +228,10 @@
   // ==========================================
   // [1] 전역 설정 (기존 키 및 URL)
   // ==========================================
-  const API_KEY = "AIzaSyDbLYEv3MbBDvU19BYXyGu11bUULVYnebQ";
+  // 기존 API_KEY 변수는 보안을 위해 삭제합니다.
   const GAS_URL = "https://script.google.com/macros/s/AKfycbx7G4_YaiAhPLRW7ccM15aEurQj0f4q0KROsm_V6zwVfrAaIq2lMjcJ0aWOnso3Ildd/exec";
+  // 우리가 만든 Cloudflare Worker 주소 (https:// 꼭 붙이세요!)
+  const WORKER_URL = "https://gemini-proxy.luxuryguy562.workers.dev";
   let b64 = "";
   let currentTargetRowIdx = -1;
 
@@ -285,7 +287,7 @@
     setLoad(true, "AI 분석 중...");
     const pmt = `영수증 분석 JSON: date, vendor(치환:'논산농협'->'농협','광성탑마트'->'탑마트','홈플러스 논산점'->'홈플러스'), item, totalPrice, category.`;
     try {
-      const res = await fetch(`gemini-proxy.luxuryguy562.workers.dev`, {
+      const res = await fetch(WORKER_URL, {
         method:'POST', headers:{'Content-Type':'application/json'},
         body: JSON.stringify({ contents: [{ parts: [{ text: pmt }, { inline_data: { mime_type:"image/jpeg", data:b64 }}] }], generationConfig:{response_mime_type:"application/json"}})
       });
