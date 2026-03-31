@@ -288,37 +288,34 @@
       body: JSON.stringify({
         contents: [{
           parts: [
-            { text: "영수증 분석 JSON: date, vendor, item, totalPrice, category" },
+            { text: "영수증을 분석하여 다음 필드를 포함한 JSON 배열로 응답해줘: date(YYYY-MM-DD), vendor(거래처명), item(품목명), totalPrice(숫자만), category(음식재료, 소모품, 간식 중 선택). 반드시 순수 JSON만 출력해." },
             { inline_data: { mime_type: "image/jpeg", data: b64 } }
           ]
         }],
-        generationConfig: { responseMimeType: "application/json" }
+        // [중요] 최신 구글 API 규격: 언더바(_) 형식을 사용합니다.
+        generationConfig: { 
+          response_mime_type: "application/json" 
+        }
       })
     });
 
     const data = await res.json();
-    console.log("📦 AI 전체 응답:", data); // 콘솔에서 전체 구조 확인용
-
-    // [중요] 에러 체크 로직 추가
-    if (data.error) {
-      throw new Error(`구글 API 에러: ${data.error.message}`);
-    }
-    if (!data.candidates || data.candidates.length === 0) {
-      throw new Error("AI가 결과를 생성하지 못했습니다. (응답 없음)");
-    }
+    if (data.error) throw new Error(data.error.message);
 
     const rawText = data.candidates[0].content.parts[0].text;
-    const list = JSON.parse(rawText);
+    // 마크다운 태그 기호(```json)가 섞여 있어도 안전하게 파싱합니다.
+    const jsonString = rawText.replace(/```json/g, "").replace(/```/g, "").trim();
+    const list = JSON.parse(jsonString);
 
     let html = "";
     list.forEach((i, idx) => {
       html += `<tr id="row-${idx}">
         <td><button class="x-btn" onclick="openReasonSheet(${idx})">X</button></td>
-        <td><input type="text" class="c-v" value="${i.vendor}"></td>
-        <td><input type="text" class="c-i" value="${i.item}"></td>
-        <td><input type="number" class="c-p" value="${i.totalPrice}"></td>
-        <td><input type="text" class="c-c" value="${i.category}"></td>
-        <input type="hidden" class="c-d" value="${i.date || new Date().toLocaleDateString('sv-SE')}">
+        <td><input type="text" class="c-v" value="${i.vendor || ''}"></td>
+        <td><input type="text" class="c-i" value="${i.item || ''}"></td>
+        <td><input type="number" class="c-p" value="${i.totalPrice || 0}"></td>
+        <td><input type="text" class="c-c" value="${i.category || ''}"></td>
+        <input type="hidden" class="c-d" value="${i.date || new Date().toISOString().split('T')[0]}">
       </tr>`;
     });
 
@@ -326,8 +323,8 @@
     document.getElementById('resultArea').style.display = 'block';
 
   } catch (e) {
-    console.error("🚩 상세 에러:", e);
-    alert("분석 실패: " + e.message); // 이제 구체적인 실패 이유가 팝업에 뜹니다.
+    console.error("에러 상세:", e);
+    alert("분석 실패: " + e.message);
   } finally {
     setLoad(false);
   }
