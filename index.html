@@ -288,12 +288,12 @@
       body: JSON.stringify({
         contents: [{
           parts: [
-            { text: "영수증을 분석하여 다음 필드를 포함한 JSON 배열로 응답해줘: date(YYYY-MM-DD), vendor(거래처명), item(품목명), totalPrice(숫자만), category(음식재료, 소모품, 간식 중 선택). 반드시 순수 JSON만 출력해." },
+            { text: "영수증을 분석하여 다음 필드를 가진 JSON 배열로 응답해: date(YYYY-MM-DD), vendor(거래처명), item(품목명), totalPrice(숫자), category(음식재료, 소모품, 간식 중 선택). 반드시 다른 설명 없이 순수 JSON만 출력해." },
             { inline_data: { mime_type: "image/jpeg", data: b64 } }
           ]
         }],
-        // [중요] 최신 구글 API 규격: 언더바(_) 형식을 사용합니다.
         generationConfig: { 
+          // v1beta 주소와 호환되는 공식 명칭입니다.
           response_mime_type: "application/json" 
         }
       })
@@ -302,8 +302,8 @@
     const data = await res.json();
     if (data.error) throw new Error(data.error.message);
 
+    // AI 응답 추출 및 마크다운 기호 제거
     const rawText = data.candidates[0].content.parts[0].text;
-    // 마크다운 태그 기호(```json)가 섞여 있어도 안전하게 파싱합니다.
     const jsonString = rawText.replace(/```json/g, "").replace(/```/g, "").trim();
     const list = JSON.parse(jsonString);
 
@@ -323,13 +323,12 @@
     document.getElementById('resultArea').style.display = 'block';
 
   } catch (e) {
-    console.error("에러 상세:", e);
+    console.error("상세 에러:", e);
     alert("분석 실패: " + e.message);
   } finally {
     setLoad(false);
   }
 }
-
   function resetReceipt() { location.reload(); }
 
   function openReasonSheet(idx) { currentTargetRowIdx = idx; openSheet('reasonSheet'); }
